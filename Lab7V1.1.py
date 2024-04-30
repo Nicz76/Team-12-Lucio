@@ -6,7 +6,7 @@ import sys
 import math
 
 
-picam2 = PiCamera2
+picam2 = PiCamera2()
 picam2.start()
 time.sleep()
 
