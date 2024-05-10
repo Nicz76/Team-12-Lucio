@@ -8,6 +8,10 @@ import math
 picam2 = Picamera2()
 picam2.start()
 time.sleep(1)
+left_line_x = []
+left_line_y = []
+right_line_x = []
+right_line_y = []
 
 if __name__=='__main__':
 	print('Started')
@@ -66,27 +70,25 @@ if __name__=='__main__':
 						if abs(l[2]-l[0]) < abs(l[3]- l[1]):
 							cv2.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv2.LINE_AA)
 					print(lines)
-					#slope = float((line(3)-line(1))/(line(2)-line[0]))
-					#if slope 
+					slope = float((line(3)-line(1))/(line(2)-line[0]))
 
 
-					#cv2.line(cdstP, (line[0], line[1]), (line[2], line[3]), (0,0,255), 3, cv2.LINE_AA)
+					cv2.line(cdstP, (line[0], line[1]), (line[2], line[3]), (0,0,255), 3, cv2.LINE_AA)
 
-					# for x1,y1,x2,y2 in line:
-					# 	a = float((y2-y1)/(x2-x1))
-					# 	b = (y1-a*x1)      
-					# 	length = math.sqrt(pow(y2-y1,2)+ pow(x2-x1,2))
-					# 	if not np.isnan(a) or np.isinf(a) or (a == 0):
-					# 		if (a > -1.5) and (a < -0.3) :
-					# 			cumLengthLeft += pow(length,2)
-					# 			a_left += a * pow(length,2)
-					# 			b_left += b * pow(length,2)
+					for x1,y1,x2,y2 in line:
+						a = float((y2-y1)/(x2-x1))
+						b = (y1-a*x1)      
+						length = math.sqrt(pow(y2-y1,2)+ pow(x2-x1,2))
+						if not np.isnan(a) or np.isinf(a) or (a == 0):
+					 		if (a > -1.5) and (a < -0.3):
+					 			cumLengthLeft += pow(length,2)
+								a_left += a * pow(length,2)
+						b_left += b * pow(length,2)
 
-					# 		if (a > 0.3) and (a < 1.5) :               
-					# 			cumLengthRight += pow(length,2)
-					# 			a_right += a * pow(length,2)
-					# 			b_right += b * pow(length,2)
-				
+					 		if (a > 0.3) and (a < 1.5) :               
+					 			cumLengthRight += pow(length,2)
+					 			a_right += a * pow(length,2)
+					 			b_right += b * pow(length,2)
 			cv2.imshow("Lines", cdstP)
 			
 			#End of the code Functions
