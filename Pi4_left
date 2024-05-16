@@ -1,0 +1,39 @@
+from gpiozero import DistanceSensor
+ultrasonic = DistanceSensor (echo=17, trigger=4)
+import time
+import numpy as np
+import serial
+import os
+
+ser = serial.Serial(
+ port='/dev/ttyS0',
+ baudrate = 9600,
+ parity=serial.PARITY_NONE,
+ stopbits=serial.STOPBITS_ONE,
+ bytesize=serial.EIGHTBITS,
+ timeout=1
+)
+
+previous_error = 0
+integral = 0
+i = 0
+I = 0
+setpoint = 0.30
+Kp = 1
+Ki = 1
+Kd = 1
+dt = 0.1
+while True:
+    previous_error = ultrasonic.distance
+    error = (setpoint - previous_error)/ dt
+    P = error
+    I = I + (P * dt)
+    D = (P - previous_error) / dt
+    output = Kp * P + Ki * I + Kd * D
+    previous_error = P
+    output = output.to_bytes(2)
+    bytes_val = output.from_bytes(2, 'big', signed=True)
+    print(output)
+    ser.write(output)
+    time.sleep(1)
+    time.sleep(dt)
