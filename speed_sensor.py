@@ -41,7 +41,17 @@ while True:
     start_time = current_time
 
 time.sleep(0.01)
-    
+
+for (i < 10):
+  error = (setpoint - previous_error)/ dt
+  P = error
+  I = I + (P * dt)
+  D = (P - previous_error) / dt
+  output = Kp * P + Ki * I + Kd * D
+  previous_error = P
+  time.sleep(dt)
+
+
     #print(a)
     # a = 0
     # start_time = time.time()
@@ -57,11 +67,4 @@ time.sleep(0.01)
 # Kd = 1
 # dt = 0.1
 
-for (i < 10):
-  error = (setpoint - previous_error)/ dt
-  P = error
-  I = I + (P * dt)
-  D = (P - previous_error) / dt
-  output = Kp * P + Ki * I + Kd * D
-  previous_error = P
-  time.sleep(dt)
+
