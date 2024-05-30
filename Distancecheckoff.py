@@ -1,7 +1,9 @@
 from gpiozero import DistanceSensor
+import RPi.GPIO as GPIO
+GPIO.setwarnings(False)
 ultrasonic_left = DistanceSensor (echo=17, trigger=4)
-ultrasonic_front = DistanceSensor (echo=27, trigger=4)
-ultrasonic_right = DistanceSensor (echo=22, trigger=4)
+#ultrasonic_front = DistanceSensor (echo=27, trigger=6)
+ultrasonic_right = DistanceSensor (echo=22, trigger=5)
 import time
 import numpy as np
 import serial
@@ -41,21 +43,21 @@ while True:
     P = error_left
     I_left = I_left + (P * dt)
     D_left = (P - previous_error_left) / dt
-    output = Kp * P + Ki * I + Kd * D_left
+    output = Kp * P + Ki * I_left + Kd * D_left
     previous_error_left = P
     convert = (str(int(output))).encode('utf-8')
     send_arr[0] = convert
-
+    
     previous_error_right = ultrasonic_right.distance
     error_right = (setpoint - previous_error_right)/ dt
     P = error_right
     I_right = I_right + (P * dt)
     D_right = (P - previous_error_right) / dt
-    output = Kp * P + Ki * I + Kd * D_left
+    output = Kp * P + Ki * I_right + Kd * D_left
     previous_error_right = P
     convert = (str(int(output))).encode('utf-8')
     send_arr[2] = convert
-
+    '''
     previous_error_front = ultrasonic_front.distance
     error_front = (setpoint - previous_error_front)/ dt
     P = error_front
@@ -65,7 +67,7 @@ while True:
     previous_error_front = P
     convert = (str(int(output))).encode('utf-8')
     send_arr[1] = convert
-
+    '''
     #Send the data
     #ser.write(send_arr)
     print(send_arr)
