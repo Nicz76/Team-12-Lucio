@@ -1,0 +1,77 @@
+from machine import Pin, Timer, PWM
+import time
+
+pwm1 = PWM(Pin(0))
+pwm1.freq(100)
+           
+a = 0
+interrupt_flag = 0
+
+integral = 0
+i = 0
+I = 0
+setpoint = 20
+Kp = 1
+Ki = 1
+Kd = 1
+dt = 1
+interrupt_count = 0
+lastTime = time.time_ns()
+print(lastTime)
+pin = Pin(5, Pin.IN, Pin.PULL_UP)
+sensor = machine.Pin(5, machine.Pin.IN)
+
+def handle_interrupt(pin):
+  global interrupt_count
+  global lastTime
+  interval = time.time_ns() - lastTime
+  if (interval > 1000000):
+    lastTime = time.time_ns()
+    if(sensor.value()==1):
+      interrupt_count = interrupt_count + 1
+sensor.irq(trigger = Pin.IRQ_RISING, handler = handle_interrupt)
+
+def callback(pin):
+  global interrupt_count
+  interrupt_flag = interrupt_flag + 1
+
+def periodicFunction(pin):
+    global interrupt_count
+    print(f"Interrupt count:" + str(interrupt_count))
+    interrupt_count = 0
+   
+Timer(mode=Timer.PERIODIC, freq=1, callback=periodicFunction)
+
+start_time = time.time()
+
+speed=7000
+pwm1.duty_u16(speed)
+
+
+while True:
+   
+    current_time = time.time()
+    elapsed_time = current_time - start_time
+    
+    
+    if elapsed_time >= dt:
+        
+        measured_value = interrupt_count
+        error = (setpoint - measured_value) / dt
+        P = error
+        integral += error * dt
+        I = I + (P * dt)
+        D = (P - measured_value) / dt
+        output = Kp * P + Ki * I + Kd * D 
+        speed = speed + output
+        print(f"PID Output: {output}")
+        print("Speed: ", speed)
+        pwm1.duty_u16(int(speed))
+        interrupt_count = 0
+        
+        
+        start_time = current_time
+
+   
+    time.sleep(0.01)
+
