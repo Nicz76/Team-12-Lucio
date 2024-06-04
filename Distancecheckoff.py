@@ -1,6 +1,6 @@
 from gpiozero import DistanceSensor
-import RPi.GPIO as GPIO
-GPIO.setwarnings(False)
+#import RPi.GPIO as GPIO
+#GPIO.setwarnings(False)
 ultrasonic_left = DistanceSensor (echo=17, trigger=4)
 ultrasonic_front = DistanceSensor (echo=27, trigger=6)
 ultrasonic_right = DistanceSensor (echo=22, trigger=5)
@@ -20,8 +20,8 @@ ser = serial.Serial(
 
 '''
 pwm1.duty_u16(9754)#1.5ms
-pwm1.duty_u16(12354)#1.9ms
-pwm1.duty_u16(7154)#1.1ms
+pwm1.duty_u16(12354)#1.9ms (Right)
+pwm1.duty_u16(7154)#1.1ms (Left)
 '''
 def PID_left():
     global previous_error_left
@@ -33,9 +33,9 @@ def PID_left():
     I_left = I_left + (P * dt)
     D_left = (P - previous_error_left) / dt
     output = Kp * P + Ki * I_left + Kd * D_left
-    previous_error_left = P
-    convert = (str(int(output))).encode('utf-8')
-    send_arr[1] = convert
+    output = -output
+    #convert = (str(int(output))).encode('utf-8')
+    send_arr[1] = int(output)
     return
 def PID_right():
     global previous_error_right
@@ -47,9 +47,8 @@ def PID_right():
     I_right = I_right + (P * dt)
     D_right = (P - previous_error_right) / dt
     output = Kp * P + Ki * I_right + Kd * D_left
-    previous_error_right = P
-    convert = (str(int(output))).encode('utf-8')
-    send_arr[1] = convert
+    #convert = (str(int(output))).encode('utf-8')
+    send_arr[1] = int(output)
     return
 def PID_straight():
     global previous_error_front
@@ -61,9 +60,8 @@ def PID_straight():
     I_front = I_front + (P * dt)
     D_front = (P - previous_error_front) / dt
     output = Kp * P + Ki * I_front + Kd * D_front
-    previous_error_front = P
-    convert = (str(int(output))).encode('utf-8')
-    send_arr[1] = convert
+    #convert = (str(int(output))).encode('utf-8')
+    send_arr[1] = int(output)
 
 #Creating an array to hold the values
 send_arr = [0,0]
@@ -84,21 +82,34 @@ Ki = 1
 Kd = 1
 dt = 0.1
 while True:
-    if(ultrasonic_front <= (setpoint)):
-        brake = 1
-        if (ultrasonic_left < setpoint & ultrasonic_right < setpoint):
-            U_turn = 1
-        elif(ultrasonic_left > ultrasonic_right):
-            PID_left()
-        else:
+    front = ultrasonic_front.distance
+    time.sleep(0.1)
+    left = ultrasonic_left.distance
+    time.sleep(0.1)
+    right = ultrasonic_right.distance
+    time.sleep(0.1) 
+    if (front > setpoint):
+        send_arr[0] = 1
+    elif (send_arr[0] == 0):
+        if ((left < setpoint) & (right < setpoint)):
+            send_arr[0] = -1
+            send_arr[1] = 0
+        elif((left <= setpoint) & (right >= setpoint)):
             PID_right()
-    elif(ultrasonic_left <= setpoint):
+        elif ((right <= setpoint) & (left >= setpoint)):
+            PID_left()
+    elif(front <= setpoint):
+        send_arr[0] = 0
+
+    if((left < right) & (send_arr != -1)):
         PID_right()
-    elif (ultrasonic_right <= setpoint):
+    elif ((right < left) & (send_arr != -1)):
         PID_left()
 
     #Send the data
-    ser.write(send_arr)
     print(send_arr)
-    time.sleep(1)
-    time.sleep(dt)
+    send_data = str(send_arr).encode('utf-8')
+    #print(send_data)
+    ser.write(send_data)
+    #ser.write(send_arr[1])
+    time.sleep(0.7)
