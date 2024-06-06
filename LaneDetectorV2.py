@@ -127,7 +127,7 @@ if __name__=='__main__':
 			result = cv2.addWeighted(array, 0.8, lane_image, 1, 0)
             
 			# Calculate the deviation from the center
-            if left_line is not None and right_line is not None:
+            		if left_line is not None and right_line is not None:
 				mid = width / 2
 				left_x2 = left_line[1][0]
 				right_x2 = right_line[1][0]
@@ -148,12 +148,7 @@ if __name__=='__main__':
 				cv2.putText(result, f"Steering: {direction}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     	
 			# Show the frame
-            cv2.imshow("Frame", result)
-       		key = cv2.waitKey(1) & 0xFF
-			
-					
-			cv2.line(cdstP, (x1_left,y_max), (x2_left,), (0,0,255), 3, cv2.LINE_AA)			
-			cv2.imshow("Lines", cdstP)
+            		cv2.imshow("Result", result)
 			
 			#End of the code Functions
 			cv2.imshow('Frame', cur_frame)
